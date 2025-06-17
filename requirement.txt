@@ -1,0 +1,10 @@
+flask
+streamlit
+requests
+pandas
+python-dotenv
+beautifulsoup4
+lxml
+nltk
+scikit-learn
+tweepy
