@@ -26,7 +26,9 @@ if response.status_code == 200:
             with cols[1]:
                 st.subheader(item["title"])
                 st.write(item["description"] or "No description available.")
-                st.markdown(f"[🔗 Read more]({item['url']})", unsafe_allow_html=True)
+                with st.expander("🔍 Read More"):
+                    st.write(item.get("content") or "Full content not available.")
+                    st.markdown(f"🔗 [Original Source]({item['url']})", unsafe_allow_html=True)
 
             st.markdown("---")
 
