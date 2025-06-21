@@ -54,8 +54,8 @@ def display_fraud_facts(df,year,quarter ,state_name,report_type, field_name, tit
     st.metric(title, number_format.format(round(total)))
 
 def display_map(df, year, quarter):
-    st.title(APP_TITLE)
-    st.caption(APP_SUB_TITLE)
+    # st.title(APP_TITLE)
+    # st.caption(APP_SUB_TITLE)
 
     df= df[(df['Year']== year)& (df['Quarter']==quarter)] 
 
