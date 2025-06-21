@@ -22,11 +22,7 @@ if response.status_code == 200:
             else:
                 cols[0].image("https://via.placeholder.com/150", caption="No Image", width=150)
 
-            # 📝 Info
-            with cols[1]:
-                st.subheader(item["title"])
-                st.write(item["description"] or "No description available.")
-                st.markdown(f"[🔗 Read more]({item['url']})", unsafe_allow_html=True)
+           
 
             st.markdown("---")
 
