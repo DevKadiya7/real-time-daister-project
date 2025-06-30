@@ -7,7 +7,7 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 
 st.markdown("## 🌍 Real-Time Disaster Information Dashboard")
-st.markdown("Live updates from NewsAPI based on keywords like **disaster, earthquake, flood**")
+st.markdown("Live updates from NewsAPI based on keywords like disaster, earthquake, flood")
 
 def display_API():
     # Call Flask backend
@@ -31,15 +31,6 @@ def display_API():
                     st.subheader(item["title"])
                     st.write(item["description"] or "No description available.")
                     st.markdown(f"[🔗 Read more]({item['url']})", unsafe_allow_html=True)
-
-            # 📝 Info
-            with cols[1]:
-                st.subheader(item["title"])
-                st.write(item["description"] or "No description available.")
-                with st.expander("🔍 Read More"):
-                    st.write(item.get("content") or "Full content not available.")
-                    st.markdown(f"🔗 [Original Source]({item['url']})", unsafe_allow_html=True)
-
 
                 st.markdown("---")
 
@@ -122,10 +113,6 @@ def display_report_type():
     return st.sidebar.radio('Report Type', report_types)
 
 def main():
-    
-   
-
-
     #Load data
     df_continental = pd.read_csv('../data/AxS-Continental_Full Data_data.csv')
     df_fraud       = pd.read_csv('../data/AxS-Fraud Box_Full Data_data.csv')
