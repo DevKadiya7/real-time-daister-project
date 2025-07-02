@@ -7,7 +7,11 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 
 st.markdown("## 🌍 Real-Time Disaster Information Dashboard")
+<<<<<<< HEAD
 st.markdown("Live updates from NewsAPI based on keywords like *disaster, earthquake, flood*")
+=======
+st.markdown("Live updates from NewsAPI based on keywords like disaster, earthquake, flood")
+>>>>>>> 140c3b390d9c90e1db74f7f2087575d86a3602b9
 
 def display_API():
     # Call Flask backend
@@ -138,5 +142,9 @@ def main():
     with col3:
         display_fraud_facts(df_loss,year,quarter ,state_name,report_type, 'Total Losses' , 'Total & Loss')
 
+<<<<<<< HEAD
 if __name__== "__main__":
+=======
+if __name__ == "__main__":
+>>>>>>> 140c3b390d9c90e1db74f7f2087575d86a3602b9
     main()
