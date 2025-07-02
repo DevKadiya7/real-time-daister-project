@@ -7,7 +7,7 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 
 st.markdown("## 🌍 Real-Time Disaster Information Dashboard")
-st.markdown("Live updates from NewsAPI based on keywords like *disaster, earthquake, flood*")
+st.markdown("Live updates from NewsAPI based on keywords like **disaster, earthquake, flood**")
 
 def display_API():
     # Call Flask backend
@@ -28,9 +28,18 @@ def display_API():
 
                 #  Info
                 with cols[1]:
-                    st.subheader(item.get("title", "No Title"))
+                    st.subheader(item["title"])
                     st.write(item["description"] or "No description available.")
                     st.markdown(f"[🔗 Read more]({item['url']})", unsafe_allow_html=True)
+
+            # 📝 Info
+            with cols[1]:
+                st.subheader(item["title"])
+                st.write(item["description"] or "No description available.")
+                with st.expander("🔍 Read More"):
+                    st.write(item.get("content") or "Full content not available.")
+                    st.markdown(f"🔗 [Original Source]({item['url']})", unsafe_allow_html=True)
+
 
                 st.markdown("---")
 
@@ -62,7 +71,7 @@ def display_map(df, year, quarter):
     my_map = folium.Map(location=[38, -96.5], zoom_start=4,scrollWheelZoom=False ,tiles='CartoDB positron')
 
     choropleth=folium.Choropleth(
-        geo_data='../frontend/data/us-state-boundaries.geojson',
+        geo_data='../data/us-state-boundaries.geojson',
         data=df,
         columns=('State Name' ,'State Total Reports Quarter'),
         key_on='feature.properties.name',
@@ -83,12 +92,12 @@ def display_map(df, year, quarter):
         feature['properties']['population']='population: ' + str('{:,}'.format(df.loc[state_name ,'State Pop'][0]) if state_name in list(df.index) else 'N\A')
         feature['properties']['per_100k']='Reports/100K Population:'+str('{:,}'.format(round(df.loc[state_name ,'Reports per 100K-F&O together'][0])) if state_name in list(df.index) else 'N\A')
     choropleth.geojson.add_child(
-        folium.features.GeoJsonTooltip(['name', 'population','per_100k'], labels=False)
+        folium.features.GeoJsonTooltip(['name', 'population','per_100k'], labs=False)
     )
 
     st_map = st_folium(my_map, width=700, height=450)
     state_name=''
-    if 'last_active_drawing' in st_map and st_map['last_active_drawing']:
+    if st_map['last_active_drawing']:
         state_name =st.write(st_map['last_active_drawing']['properties']['name'])
     
     return state_name
@@ -113,11 +122,15 @@ def display_report_type():
     return st.sidebar.radio('Report Type', report_types)
 
 def main():
+    
+   
+
+
     #Load data
-    df_continental = pd.read_csv('../frontend/data/AxS-Continental_Full Data_data.csv')
-    df_fraud       = pd.read_csv('../frontend/data/AxS-Fraud Box_Full Data_data.csv')
-    df_mead        = pd.read_csv('../frontend/data/AxS-Median Box_Full Data_data.csv')
-    df_loss        = pd.read_csv('../frontend/data/AxS-Losses Box_Full Data_data.csv')
+    df_continental = pd.read_csv('../data/AxS-Continental_Full Data_data.csv')
+    df_fraud       = pd.read_csv('../data/AxS-Fraud Box_Full Data_data.csv')
+    df_mead        = pd.read_csv('../data/AxS-Median Box_Full Data_data.csv')
+    df_loss        = pd.read_csv('../data/AxS-Losses Box_Full Data_data.csv')
 
     
     #display filters and map
@@ -138,5 +151,5 @@ def main():
     with col3:
         display_fraud_facts(df_loss,year,quarter ,state_name,report_type, 'Total Losses' , 'Total & Loss')
 
-if __name__== "__main__":
+if __name__ == "__main__":
     main()
