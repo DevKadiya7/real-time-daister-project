@@ -3,6 +3,9 @@ from fetch_news import get_news
 
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return "Welcome to the Home Page!"
 
 
 
