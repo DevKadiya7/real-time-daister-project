@@ -1,10 +1,12 @@
 flask
-streamlit
 requests
-pandas
 python-dotenv
 beautifulsoup4
 lxml
 nltk
 scikit-learn
 tweepy
+pandas==2.2.2
+folium==0.16.0
+streamlit==1.35.0
+streamlit_folium==0.17.1
