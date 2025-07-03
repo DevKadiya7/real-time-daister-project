@@ -3,6 +3,19 @@ import requests
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
+@st.cache_data(ttl=300)
+def fetch_disaster_data():
+    try:
+        response = requests.get("http://localhost:5000/api/disasters", timeout=5)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"⚠️ API Error: {response.status_code}")
+            return []
+    except Exception as e:
+        st.error(f"❌ Could not fetch news: {e}")
+        return []
+
 
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 st.title("🌍 REAL-TIME-DISASTER-DASHBOARD")
@@ -30,9 +43,8 @@ if page != "🗺️ Map":
 
 # API display function
 def display_API():
-    response = requests.get("http://localhost:5000/api/disasters")
-    if response.status_code == 200:
-        data = response.json()
+    data = fetch_disaster_data()
+    if data:
         for item in data:
             with st.container():
                 cols = st.columns([1, 3])
@@ -43,8 +55,9 @@ def display_API():
                     st.markdown(f"[🔗 Read more]({item['url']})", unsafe_allow_html=True)
                 st.markdown("---")
     else:
-        st.error("❌ Failed to fetch data from backend. Please check Flask server.")
+        st.error("❌ Failed to fetch data from backend.")
 
+                  
 # Map and metrics functions
 APP_TITLE = 'Fraud and Identity Theft Report'
 APP_SUB_TITLE = 'Source: Federal Trade Commission'
@@ -114,7 +127,8 @@ def main():
         st.write("This is the main dashboard with data overview.")
 
     elif page == "🗺️ Map":
-        st.header("🗺️ Real-Time Map")
+        with st.container():
+            st.header("🗺️ Real-Time Map")
 
         # Sidebar controls (only shown now)
         with st.sidebar:
@@ -139,7 +153,9 @@ def main():
             display_fraud_facts(df_loss, year, quarter, final_state, report_type, "Total Losses", "Total Loss")
 
     elif page == "📰 News":
-        st.header("📰 Disaster News")
+        placeholder = st.empty()
+        with placeholder.container():
+            st.header("📰 Disaster News")
         display_API()
 
     elif page == "📩 Help Request":
