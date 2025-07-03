@@ -5,6 +5,8 @@ import folium
 from streamlit_folium import st_folium
 
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
+st.title("🌍 REAL-TIME-DISASTER-DASHBOARD")
+
 
 # Global hide header/footer/menu
 st.markdown("""
@@ -147,6 +149,8 @@ def main():
         need = st.text_area("What do you need?")
         if st.button("Submit Request"):
             st.success("✅ Your help request has been submitted!")
+
+    st.markdown("<hr><p style='text-align:center;'>© 2025 Real-Time Disaster Dashboard | Developed by Himanshi Kanzariya</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
