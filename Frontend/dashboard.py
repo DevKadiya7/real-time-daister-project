@@ -3,10 +3,11 @@ import requests
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
+
 @st.cache_data(ttl=300)
 def fetch_disaster_data():
     try:
-        response = requests.get("http://localhost:5000/api/disasters", timeout=5)
+        response = requests.get("http://127.0.0.1:5000/api/disasters", timeout=5)
         if response.status_code == 200:
             return response.json()
         else:
@@ -130,49 +131,57 @@ def main():
     df_mead = pd.read_csv('../data/AxS-Median Box_Full Data_data.csv')
     df_loss = pd.read_csv('../data/AxS-Losses Box_Full Data_data.csv')
 
+    
     if page == "🏠 Dashboard":
         st.header("🏠 Dashboard")
         st.write("This is the main dashboard with data overview.")
         import altair as alt
 
-    
-
         st.title("🌤️ Real-Time Weather Forecast Dashboard")
 
-# Get city from user
         city = st.text_input("Enter city", "Ahmedabad")
-
         api_key = "6ee32a9a3efc05460b01ee2743ad0b5e"
 
         if st.button("Get Live Forecast"):
-            url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
-            response = requests.get(url)
+        # Fetch current weather
+            current_url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+            current_response = requests.get(current_url)
 
-            if response.status_code == 200:
-                data = response.json()
-
-        # Extract forecast
-                forecast = pd.DataFrame([{
-                    'datetime': item['dt_txt'],
-                    'temperature': item['main']['temp'],
-                    'humidity': item['main']['humidity'],
-                } for item in data['list']])
-
-        # Convert datetime
-                forecast['datetime'] = pd.to_datetime(forecast['datetime'])
-
-        # Line chart for temperature
-                line_chart = alt.Chart(forecast).mark_line(color="orange").encode(
-                    x='datetime:T',
-                    y='temperature:Q',
-                    tooltip=['datetime', 'temperature']
-                ).properties(
-                    title=f"Temperature Forecast - {city}"
-        )
-
-                st.altair_chart(line_chart, use_container_width=True)
+            if current_response.status_code == 200:
+                current_data = current_response.json()
+                current_temp = current_data['main']['temp']
+                current_weather = current_data['weather'][0]['description'].title()
+                st.metric(label=f"🌡️ Current Temperature in {city}", value=f"{current_temp}°C", delta=None)
+                st.write(f"**Condition:** {current_weather}")
             else:
-                st.error("API call failed: " + str(response.status_code))
+                st.error("⚠️ Failed to fetch current weather data.")
+
+        # Fetch forecast
+        url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json()
+            forecast = pd.DataFrame([{
+                'datetime': item['dt_txt'],
+                'temperature': item['main']['temp'],
+                'humidity': item['main']['humidity'],
+            } for item in data['list']])
+
+            forecast['datetime'] = pd.to_datetime(forecast['datetime'])
+
+            # Line chart for temperature
+            line_chart = alt.Chart(forecast).mark_line(color="orange").encode(
+                x='datetime:T',
+                y='temperature:Q',
+                tooltip=['datetime', 'temperature']
+            ).properties(
+                title=f"Temperature Forecast - {city}"
+            )
+            st.altair_chart(line_chart, use_container_width=True)
+        else:
+            st.error("⚠️ Forecast API call failed.")
+
     elif page == "🗺️ Map":
         with st.container():
             st.header("🗺️ Real-Time Map")

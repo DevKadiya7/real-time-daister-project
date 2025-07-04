@@ -1,22 +1,44 @@
-from flask import Flask, jsonify
-from fetch_news import get_news
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+import requests
 
-app = Flask(__name__)
+app = FastAPI()
 
+# Allow frontend (Streamlit or browser) to access API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace with specific domain in production
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.route('/')
-def home():
-    return "Welcome to the Home Page!"
+# 👋 Root route
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Disaster News API. Use /api/disasters to get data."}
 
-@app.route("/")
-def index():
-    return "Welcome to the Disaster News API. Use /api/disasters to get data." 
+# 🌊 Tsunami or disaster news API route
+@app.get("/api/disasters")
+async def get_disasters():
+    try:
+        # Replace with your own NewsAPI key
+        api_key = "69f48923e7254c158bda56b10f06b460"
+        url = f"https://newsapi.org/v2/everything?q=tsunami&sortBy=publishedAt&apiKey={api_key}"
 
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        articles = response.json().get("articles", [])
 
-@app.route("/api/disasters")
-def get_disasters():
-    news_data = get_news()
-    return jsonify(news_data)
+        news_data = [{
+            "title": a.get("title"),
+            "description": a.get("description"),
+            "url": a.get("url"),
+            "image": a.get("urlToImage", "https://via.placeholder.com/150")
+        } for a in articles]
 
-if __name__ == "__main__":
-    app.run(debug=True)
+        return JSONResponse(content=news_data)
+
+    except Exception as e:
+        print("❌ ERROR:", e)
+        return JSONResponse(status_code=500, content={"error": str(e)})
