@@ -3,10 +3,15 @@ import requests
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
+<<<<<<< HEAD
 @st.cache_data(ttl=300, show_spinner=False)
+=======
+
+@st.cache_data(ttl=300)
+>>>>>>> 4c4ee6b446b5e66f725906d07d60e8ca4f80701f
 def fetch_disaster_data():
     try:
-        response = requests.get("http://localhost:5000/api/disasters", timeout=5)
+        response = requests.get("http://127.0.0.1:5000/api/disasters", timeout=5)
         if response.status_code == 200:
             return response.json()
         else:
@@ -16,12 +21,14 @@ def fetch_disaster_data():
         st.error(f"❌ Could not fetch news: {e}")
         return []
 
+<<<<<<< HEAD
 disaster_data = fetch_disaster_data()
 
+=======
+>>>>>>> 4c4ee6b446b5e66f725906d07d60e8ca4f80701f
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 st.title("🌍 REAL-TIME-DISASTER-DASHBOARD")
 
-#himanshi
 # Global hide header/footer/menu
 st.markdown("""
     <style>
@@ -29,12 +36,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Define tab navigation (using radio so we can detect page state)
-page = st.radio("Navigation", ["🏠 Dashboard", "🗺️ Map", "📰 News", "📩 Help Request"],
+page = st.radio("Navigation", ["🏠 Dashboard", "🗸️ Map", "📰 News", "📩 Help Request"],
                 horizontal=True, label_visibility="collapsed")
 
-# Hide sidebar if not on Map tab
-if page != "🗺️ Map":
+if page != "🗸️ Map":
     st.markdown("""
         <style>
         section[data-testid="stSidebar"] {display: none !important;}
@@ -42,10 +47,17 @@ if page != "🗺️ Map":
         </style>
     """, unsafe_allow_html=True)
 
+<<<<<<< HEAD
 # API display function
 def display_API(preloaded_data):
     if preloaded_data:
         for item in preloaded_data:
+=======
+def display_API():
+    data = fetch_disaster_data()
+    if data:
+        for item in data:
+>>>>>>> 4c4ee6b446b5e66f725906d07d60e8ca4f80701f
             with st.container():
                 cols = st.columns([1, 3])
                 cols[0].image(item.get("image") or "https://via.placeholder.com/150", width=150)
@@ -56,8 +68,12 @@ def display_API(preloaded_data):
                 st.markdown("---")
     else:
         st.error("❌ Failed to fetch data from backend.")
+<<<<<<< HEAD
                   
 # Map and metrics functions
+=======
+
+>>>>>>> 4c4ee6b446b5e66f725906d07d60e8ca4f80701f
 APP_TITLE = 'Fraud and Identity Theft Report'
 APP_SUB_TITLE = 'Source: Federal Trade Commission'
 
@@ -68,14 +84,6 @@ def display_fraud_facts(df, year, quarter, state_name, report_type, field_name, 
     df.drop_duplicates(inplace=True)
     total = df[field_name].sum()/len(df) if is_meadian and len(df) else df[field_name].sum()
     st.metric(title, number_format.format(round(total)))
-
-def fetch_weather(city):
-    api_key = "your_api_key_here"
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    return None
 
 def display_map(df, year, quarter):
     st.title(APP_TITLE)
@@ -102,6 +110,7 @@ def display_map(df, year, quarter):
         if state_name in df.index:
             state_pop = df.loc[state_name, 'State Pop']
             reports_per_100k = df.loc[state_name, 'Reports per 100K-F&O together']
+<<<<<<< HEAD
             if isinstance(state_pop, pd.Series):
                 state_pop = state_pop.iloc[0]
             if isinstance(reports_per_100k, pd.Series):
@@ -153,11 +162,12 @@ def generate_map(df_filtered):
             state_pop = df_filtered.loc[state_name, 'State Pop']
             reports_per_100k = df_filtered.loc[state_name, 'Reports per 100K-F&O together']
 
+=======
+>>>>>>> 4c4ee6b446b5e66f725906d07d60e8ca4f80701f
             if isinstance(state_pop, pd.Series):
                 state_pop = state_pop.iloc[0]
             if isinstance(reports_per_100k, pd.Series):
                 reports_per_100k = reports_per_100k.iloc[0]
-
             population_str = f"Population: {state_pop:,}"
             per_100k_str = f"Reports/100K: {round(reports_per_100k):,}"
         else:
@@ -171,56 +181,80 @@ def generate_map(df_filtered):
     return my_map
 
 def main():
+<<<<<<< HEAD
     # Load data
     df_continental, df_fraud, df_mead, df_loss = load_all_data()
+=======
+    df_continental = pd.read_csv('../data/AxS-Continental_Full Data_data.csv')
+    df_fraud = pd.read_csv('../data/AxS-Fraud Box_Full Data_data.csv')
+    df_mead = pd.read_csv('../data/AxS-Median Box_Full Data_data.csv')
+    df_loss = pd.read_csv('../data/AxS-Losses Box_Full Data_data.csv')
+
+>>>>>>> 4c4ee6b446b5e66f725906d07d60e8ca4f80701f
     if page == "🏠 Dashboard":
         st.header("🏠 Dashboard")
-        st.write("This is the main dashboard with data overview.")
-        import altair as alt
+        st.title("🌦️ Weather Observations")
 
-    
-
-        st.title("🌤️ Real-Time Weather Forecast Dashboard")
-
-# Get city from user
-        city = st.text_input("Enter city", "Ahmedabad")
-
+        city_map = {
+            "India (New Delhi)": "New Delhi",
+            "Gujarat (Ahmedabad)": "Ahmedabad"
+        }
+        location = st.selectbox("Select Weather Station", list(city_map.keys()))
+        city = city_map[location]
         api_key = "6ee32a9a3efc05460b01ee2743ad0b5e"
 
-        if st.button("Get Live Forecast"):
-            url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
-            response = requests.get(url)
+        if st.button("🔄 Refresh Weather"):
+            try:
+                url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+                response = requests.get(url)
+                if response.status_code == 200:
+                    data = response.json()
+                    temp = data['main']['temp']
+                    temp_min = data['main']['temp_min']
+                    temp_max = data['main']['temp_max']
+                    humidity = data['main']['humidity']
+                    wind_speed = data['wind']['speed']
+                    wind_dir = data['wind'].get('deg', 0)
+                    pressure = data['main'].get('pressure', 'Offline')
+                    condition = data['weather'][0]['description'].title()
+                    from datetime import datetime
+                    timestamp = datetime.fromtimestamp(data['dt']).strftime("%I:%M %p")
 
-            if response.status_code == 200:
-                data = response.json()
+                    directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                                  'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
+                    wind_compass = directions[int(((wind_dir + 11.25) % 360) / 22.5)]
 
-        # Extract forecast
-                forecast = pd.DataFrame([{
-                    'datetime': item['dt_txt'],
-                    'temperature': item['main']['temp'],
-                    'humidity': item['main']['humidity'],
-                } for item in data['list']])
+                    with st.container():
+                        html_block = f"""
+                            <div style="background-color:#eaf4f8;padding:15px;border-radius:10px">
+                                <h2 style="text-align:center;">🌡️ {temp:.1f}°C</h2>
+                                <p style="text-align:center;">Condition: <b>{condition}</b></p>
+                                <table style="width:100%;text-align:center;">
+                                    <tr>
+                                        <td><b>Lowest</b><br>{temp_min:.1f}°C</td>
+                                        <td><b>Highest</b><br>{temp_max:.1f}°C</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Humidity</b><br>{humidity}%</td>
+                                        <td><b>Pressure</b><br>{pressure} hPa</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Wind</b><br>{wind_speed:.2f} km/h</td>
+                                        <td><b>Direction</b><br>↓ {wind_compass}</td>
+                                    </tr>
+                                </table>
+                                <p style="text-align:center;margin-top:10px;">Latest at: {timestamp}</p>
+                                <p style="text-align:center;font-size:12px;">Source: OpenWeatherMap</p>
+                            </div>
+                        """
+                        st.markdown(html_block, unsafe_allow_html=True)
+                else:
+                    st.error(f"⚠️ Failed to fetch weather data. Status code: {response.status_code}")
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
 
-        # Convert datetime
-                forecast['datetime'] = pd.to_datetime(forecast['datetime'])
-
-        # Line chart for temperature
-                line_chart = alt.Chart(forecast).mark_line(color="orange").encode(
-                    x='datetime:T',
-                    y='temperature:Q',
-                    tooltip=['datetime', 'temperature']
-                ).properties(
-                    title=f"Temperature Forecast - {city}"
-        )
-
-                st.altair_chart(line_chart, use_container_width=True)
-            else:
-                st.error("API call failed: " + str(response.status_code))
-    elif page == "🗺️ Map":
-        with st.container():
-            st.header("🗺️ Real-Time Map")
-
-        # Sidebar controls (only shown now)
+    elif page == "🗸️ Map":
+        st.header("🗸️ Real-Time Map")
         with st.sidebar:
             year_list = sorted(df_continental['Year'].unique())
             year = st.selectbox("Year", year_list, index=len(year_list)-1)
@@ -256,8 +290,7 @@ def main():
         need = st.text_area("What do you need?")
         if st.button("Submit Request"):
             st.success("✅ Your help request has been submitted!")
-    
-    
+
     st.markdown("<hr><p style='text-align:center;'>© 2025 Real-Time Disaster Dashboard | Developed by Himanshi Kanzariya</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
