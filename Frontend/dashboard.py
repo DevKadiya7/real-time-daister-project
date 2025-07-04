@@ -57,6 +57,14 @@ def display_fraud_facts(df, year, quarter, state_name, report_type, field_name, 
     total = df[field_name].sum()/len(df) if is_meadian and len(df) else df[field_name].sum()
     st.metric(title, number_format.format(round(total)))
 
+def fetch_weather(city):
+    api_key = "your_api_key_here"
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
 def display_map(df, year, quarter):
     #update
     st.title(APP_TITLE)
@@ -112,7 +120,46 @@ def main():
     if page == "🏠 Dashboard":
         st.header("🏠 Dashboard")
         st.write("This is the main dashboard with data overview.")
+        import altair as alt
 
+    
+
+        st.title("🌤️ Real-Time Weather Forecast Dashboard")
+
+# Get city from user
+        city = st.text_input("Enter city", "Ahmedabad")
+
+        api_key = "6ee32a9a3efc05460b01ee2743ad0b5e"
+
+        if st.button("Get Live Forecast"):
+            url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
+            response = requests.get(url)
+
+            if response.status_code == 200:
+                data = response.json()
+
+        # Extract forecast
+                forecast = pd.DataFrame([{
+                    'datetime': item['dt_txt'],
+                    'temperature': item['main']['temp'],
+                    'humidity': item['main']['humidity'],
+                } for item in data['list']])
+
+        # Convert datetime
+                forecast['datetime'] = pd.to_datetime(forecast['datetime'])
+
+        # Line chart for temperature
+                line_chart = alt.Chart(forecast).mark_line(color="orange").encode(
+                    x='datetime:T',
+                    y='temperature:Q',
+                    tooltip=['datetime', 'temperature']
+                ).properties(
+                    title=f"Temperature Forecast - {city}"
+        )
+
+                st.altair_chart(line_chart, use_container_width=True)
+            else:
+                st.error("API call failed: " + str(response.status_code))
     elif page == "🗺️ Map":
         st.header("🗺️ Real-Time Map")
 
@@ -149,7 +196,8 @@ def main():
         need = st.text_area("What do you need?")
         if st.button("Submit Request"):
             st.success("✅ Your help request has been submitted!")
-
+    
+    
     st.markdown("<hr><p style='text-align:center;'>© 2025 Real-Time Disaster Dashboard | Developed by Himanshi Kanzariya</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
