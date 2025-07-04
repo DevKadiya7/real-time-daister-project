@@ -12,7 +12,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+#kanzariya
 # 👋 Root route
 @app.get("/")
 async def root():
