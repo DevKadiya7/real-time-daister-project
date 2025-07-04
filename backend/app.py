@@ -3,9 +3,14 @@ from fetch_news import get_news
 
 app = Flask(__name__)
 
+
+@app.route('/')
+def home():
+    return "Welcome to the Home Page!"
+
 @app.route("/")
 def index():
-    return "Welcome to the Disaster News API. Use /api/disasters to get data."
+    return "Welcome to the Disaster News API. Use /api/disasters to get data." 
 
 
 @app.route("/api/disasters")
