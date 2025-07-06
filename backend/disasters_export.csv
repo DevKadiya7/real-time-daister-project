@@ -1,0 +1,3 @@
+id,disaster_type,location,severity,time,source,url
+quake_001,earthquake,Gujarat,6.8,1720092300,NDMA,https://example.com/quake_001
+quake_101,earthquake,Delhi,7.1,1720188000,NDMA,https://ndma.gov.in/quake_101
