@@ -4,18 +4,33 @@ import pandas as pd
 import folium
 from streamlit_folium import st_folium
 
-@st.cache_data(ttl=300)
+import requests
+import streamlit as st
+
+@st.cache_data(ttl=300, show_spinner=False)
 def fetch_disaster_data():
+    """
+    Fetch real-time disaster news from FastAPI backend.
+    Caches data for 5 minutes (300 seconds).
+    """
     try:
-        response = requests.get("http://127.0.0.1:5000/api/disasters", timeout=5)
+        # Call your FastAPI backend endpoint
+        url = "http://127.0.0.1:8000/api/disasters"
+        response = requests.get(url, timeout=5)
+
+        # Check response status
         if response.status_code == 200:
             return response.json()
         else:
-            st.error(f"⚠️ API Error: {response.status_code}")
+            st.error(f"⚠️ API Error {response.status_code}: Unable to fetch data.")
             return []
-    except Exception as e:
-        st.error(f"❌ Could not fetch news: {e}")
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Network Error: {e}")
         return []
+    except Exception as e:
+        st.error(f"❌ Unexpected Error: {e}")
+        return []
+
 
 
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
