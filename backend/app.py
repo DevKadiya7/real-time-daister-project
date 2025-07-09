@@ -2,18 +2,12 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-import requests
 
 app = FastAPI()
 
 # Allow frontend (Streamlit or browser) to access API
-
-
 app.add_middleware(
     CORSMiddleware,
-
-    allow_origins=["*"],  # You can restrict this later
-    allow_credentials=True,
     allow_origins=["*"],  # Replace with specific domain(s) in production
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,13 +25,8 @@ async def get_disasters():
         api_key = "69f48923e7254c158bda56b10f06b460"  # Replace with env var in production
         url = f"https://newsapi.org/v2/everything?q=tsunami&sortBy=publishedAt&apiKey={api_key}"
 
- 
-        response = requests.get(api_key, timeout=10)  # or even 30 if needed
-
-
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(url)
-
         response.raise_for_status()
 
         articles = response.json().get("articles", [])
