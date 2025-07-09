@@ -6,12 +6,9 @@ from streamlit_folium import st_folium
 import feedparser
 import xmltodict
 
-
-
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 st.title("🌍 REAL-TIME-DISASTER-DASHBOARD")
 @st.cache_data(ttl=300, show_spinner=False)
-
 
 def fetch_disaster_data():
     """
@@ -36,10 +33,7 @@ def fetch_disaster_data():
         st.error(f"❌ Unexpected Error: {e}")
         return []
 
-
-
 disaster_data = fetch_disaster_data()
-
 
 # Global hide header/footer/menu
 st.markdown("""
@@ -50,8 +44,6 @@ st.markdown("""
 page = st.radio("Navigation", ["🏠 Dashboard", "🗺️ Map", "📰 News", "📩 Help Request", "🚀 NASA","🌧️all india cap alert"],
                 horizontal=True, label_visibility="collapsed")
 
-
-
 if page != "🗸️ Map":
     st.markdown("""
         <style>
@@ -61,10 +53,6 @@ if page != "🗸️ Map":
     """, unsafe_allow_html=True)
 
 # API display function
-
-
-
-
 def display_API():
     data = fetch_disaster_data()
     if data:
@@ -122,7 +110,6 @@ def fetch_ndma_live_alerts():
     except Exception as e:
         st.warning(f"⚠️ Could not load live NDMA alerts: {e}")
         return []
-
 
 def add_ndma_alerts(map_object, alerts):
     for alert in alerts:
@@ -391,7 +378,7 @@ def main():
             st.error(f"❌ Failed to fetch NASA data: {e}")
 
     elif page == "🌧️all india cap alert":
-        st.header("🌧️ All India CAP Alerts (NDMA Style)")
+        st.header("🌧️ All India CAP Alerts")
 
         live_alerts = fetch_ndma_live_alerts()
         st.info(f"📡 Live Alerts Fetched: {len(live_alerts)}")

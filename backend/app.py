@@ -7,12 +7,16 @@ import requests
 app = FastAPI()
 
 # Allow frontend (Streamlit or browser) to access API
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with specific domain in production
+    allow_origins=["*"],  # You can restrict this later
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 #kanzariya
 # 👋 Root route
 @app.get("/")
@@ -27,7 +31,7 @@ async def get_disasters():
         api_key = "69f48923e7254c158bda56b10f06b460"
         url = f"https://newsapi.org/v2/everything?q=tsunami&sortBy=publishedAt&apiKey={api_key}"
 
-        response = requests.get(nasa_url, timeout=10)  # or even 30 if needed
+        response = requests.get(api_key, timeout=10)  # or even 30 if needed
 
         response.raise_for_status()
         articles = response.json().get("articles", [])
