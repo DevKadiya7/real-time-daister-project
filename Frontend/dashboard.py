@@ -3,6 +3,9 @@ import requests
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
+import feedparser
+import xmltodict
+
 
 
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
@@ -44,9 +47,10 @@ st.markdown("""
     #MainMenu, header, footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
-
-page = st.radio("Navigation", ["🏠 Dashboard", "🗸️ Map", "📰 News", "📩 Help Request"],
+page = st.radio("Navigation", ["🏠 Dashboard", "🗺️ Map", "📰 News", "📩 Help Request", "🚀 NASA","🌧️all india cap alert"],
                 horizontal=True, label_visibility="collapsed")
+
+
 
 if page != "🗸️ Map":
     st.markdown("""
@@ -57,6 +61,8 @@ if page != "🗸️ Map":
     """, unsafe_allow_html=True)
 
 # API display function
+
+
 
 
 def display_API():
@@ -75,7 +81,75 @@ def display_API():
     else:
         st.error("❌ Failed to fetch data from backend.")
 
-                  
+ 
+@st.cache_data(ttl=300)
+def fetch_ndma_live_alerts():
+    feed_url = "https://alert.ndma.gov.in/feeds/cap/rss.xml"
+    try:
+        feed = feedparser.parse(feed_url)
+
+        # 🟡 DEBUG: show number of entries found
+        st.info(f"📡 NDMA feed parsed. Entries found: {len(feed.entries)}")
+
+        if not feed.entries:
+            return []
+
+        alerts = []
+        for entry in feed.entries:
+            cap_link = entry.link
+            xml_response = requests.get(cap_link, timeout=5)
+            cap_data = xmltodict.parse(xml_response.content)
+
+            info = cap_data['alert']['info']
+            area = info.get('area', {})
+            location = area.get('areaDesc', "Unknown")
+            lat_lon = area.get('circle', '')
+
+            if lat_lon:
+                lat, lon = map(float, lat_lon.split()[0].split(','))
+            else:
+                lat, lon = 22.9734, 78.6569  # Default to center of India
+
+            alerts.append({
+                "lat": lat,
+                "lon": lon,
+                "type": info['event'],
+                "location": location
+            })
+
+        return alerts
+
+    except Exception as e:
+        st.warning(f"⚠️ Could not load live NDMA alerts: {e}")
+        return []
+
+
+def add_ndma_alerts(map_object, alerts):
+    for alert in alerts:
+        color = "orange"
+        if "Heavy" in alert["type"]:
+            color = "red"
+        elif "Moderate" in alert["type"]:
+            color = "yellow"
+        elif "Thunderstorm" in alert["type"]:
+            color = "blue"
+        elif "Cyclone" in alert["type"]:
+            color = "darkred"
+
+        folium.Marker(
+            location=[alert["lat"], alert["lon"]],
+            icon=folium.Icon(color=color, icon="info-sign"),
+            popup=f"<b>{alert['type']}</b><br>{alert['location']}",
+        ).add_to(map_object)
+
+def generate_map(df_filtered, alerts):
+    my_map = folium.Map(location=[22.9734, 78.6569], zoom_start=5, scrollWheelZoom=True, tiles='CartoDB positron')
+
+    # Add NDMA-style alerts
+    add_ndma_alerts(my_map, alerts)
+
+    return my_map
+ 
 # Map and metrics functions
 
 APP_TITLE = 'Fraud and Identity Theft Report'
@@ -284,7 +358,6 @@ def main():
             st.header("📰 Disaster News")
         display_API()
 
-
     elif page == "📩 Help Request":
         st.header("📩 Help Request Form")
         name = st.text_input("Your Name")
@@ -293,7 +366,55 @@ def main():
         if st.button("Submit Request"):
             st.success("✅ Your help request has been submitted!")
 
+    elif page == "🚀 NASA":
+        st.header("🚀 NASA Disaster Events (EONET)")
+
+        try:
+            response = requests.get("http://localhost:8000/api/nasa", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data:
+                    for event in data:
+                        with st.container():
+                            st.subheader(event['title'])
+                            st.write(f"**Category:** {event['category']}")
+                            st.write(f"**Date:** {event['date']}")
+                            if event['coordinates']:
+                                lon, lat = event['coordinates']
+                                st.map(pd.DataFrame([[lat, lon]], columns=['lat', 'lon']))
+                            st.markdown("---")
+                else:
+                    st.warning("No open NASA disaster events currently.")
+            else:
+                st.error(f"⚠️ API Error {response.status_code}: Unable to fetch data.")
+        except Exception as e:
+            st.error(f"❌ Failed to fetch NASA data: {e}")
+
+    elif page == "🌧️all india cap alert":
+        st.header("🌧️ All India CAP Alerts (NDMA Style)")
+
+        live_alerts = fetch_ndma_live_alerts()
+        st.info(f"📡 Live Alerts Fetched: {len(live_alerts)}")
+        
+       
+        map_object = folium.Map(location=[22.9734, 78.6569], zoom_start=5, scrollWheelZoom=True, tiles='CartoDB positron')
+        add_ndma_alerts(map_object, live_alerts)  # ✅ Correct
+        
+        
+        st_folium(map_object, width=1000, height=600)
+        st.subheader("📋 Live Alert Details")
+        if live_alerts:
+            for alert in live_alerts:
+                with st.expander(f"🔔 {alert['type']} - {alert['location']}"):
+                    st.write(f"📍 **Location:** {alert['location']}")
+                    st.write(f"🌐 **Coordinates:** ({alert['lat']:.4f}, {alert['lon']:.4f})")
+                    st.write(f"⚠️ **Alert Type:** {alert['type']}")
+        else:
+            st.warning("No active alerts at the moment.")
+
+    # This must be the last line inside `main()` function
     st.markdown("<hr><p style='text-align:center;'>© 2025 Real-Time Disaster Dashboard | Developed by Himanshi Kanzariya</p>", unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()

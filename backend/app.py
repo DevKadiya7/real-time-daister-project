@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from functools import lru_cache
+import httpx
 import requests
-
 app = FastAPI()
 
 # Allow frontend (Streamlit or browser) to access API
@@ -27,7 +27,8 @@ async def get_disasters():
         api_key = "69f48923e7254c158bda56b10f06b460"
         url = f"https://newsapi.org/v2/everything?q=tsunami&sortBy=publishedAt&apiKey={api_key}"
 
-        response = requests.get(url, timeout=5)
+        response = requests.get(nasa_url, timeout=10)  # or even 30 if needed
+
         response.raise_for_status()
         articles = response.json().get("articles", [])
 
@@ -43,24 +44,34 @@ async def get_disasters():
     except Exception as e:
         print("❌ ERROR:", e)
         return JSONResponse(status_code=500, content={"error": str(e)})
-@lru_cache(maxsize=1)
-def cached_nasa_events():
+
+# 🌍 EONET NASA Disaster API
+import httpx
+from fastapi.responses import JSONResponse
+
+@app.get("/api/nasa")
+async def get_nasa_disasters():
     try:
-        url = "https://eonet.gsfc.nasa.gov/api/v3/events"
-        response = requests.get(url, timeout=(3, 5))
+        nasa_url = "https://eonet.gsfc.nasa.gov/api/v3/events?status=open"
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(nasa_url)
         response.raise_for_status()
-        events = response.json().get("events", [])[:10]
-        return [{
-            "title": e["title"],
-            "category": e["categories"][0]["title"] if e.get("categories") else "N/A",
-            "link": e["sources"][0]["url"] if e.get("sources") else None
-        } for e in events]
+        events = response.json().get("events", [])
+
+        data = []
+        for event in events:
+            item = {
+                "id": event["id"],
+                "title": event["title"],
+                "category": event["categories"][0]["title"] if event["categories"] else "Unknown",
+                "date": event["geometry"][-1]["date"] if event["geometry"] else "N/A",
+                "coordinates": event["geometry"][-1]["coordinates"] if event["geometry"] else [],
+            }
+            data.append(item)
+
+        return JSONResponse(content=data)
+
     except Exception as e:
-        return {"error": str(e)}
-    
-@app.get("/api/nasa-events")
-async def get_nasa_events():
-    data = cached_nasa_events()
-    if isinstance(data, dict) and "error" in data:
-        return JSONResponse(status_code=500, content=data)
-    return JSONResponse(content=data)
+        print("❌ NASA API Error:", e)
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
