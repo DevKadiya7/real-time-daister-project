@@ -4,11 +4,9 @@ import pandas as pd
 import folium
 from streamlit_folium import st_folium
 
-
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 st.title("🌍 REAL-TIME-DISASTER-DASHBOARD")
 @st.cache_data(ttl=300, show_spinner=False)
-
 
 def fetch_disaster_data():
     """
@@ -278,11 +276,14 @@ def main():
         with col3:
             display_fraud_facts(df_loss, year, quarter, final_state, report_type, "Total Losses", "Total Loss")
 
-    elif page == "📰 News":
-        placeholder = st.empty()
-        with placeholder.container():
-            st.header("📰 Disaster News")
-        display_API()
+        elif page == "📰 News":
+            st.header("📰 NASA Disaster Feed (India)")
+
+        try:
+            df = pd.read_csv("../backend/disasters_export.csv")
+            st.dataframe(df, use_container_width=True)
+        except FileNotFoundError:
+            st.error("❌ CSV not found. Please run export_to_csv.py from backend.")
 
 
     elif page == "📩 Help Request":

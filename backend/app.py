@@ -1,8 +1,16 @@
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from functools import lru_cache
+import nasa_fetch_and_store 
+
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load variables from .env
+api_key = os.getenv("NEWS_API_KEY")
 
 app = FastAPI()
 
@@ -13,8 +21,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-#kanzariya
-# 👋 Root route
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Disaster News API. Use /api/disasters to get data."}
@@ -24,7 +30,7 @@ async def root():
 async def get_disasters():
     try:
         # Replace with your own NewsAPI key
-        api_key = "69f48923e7254c158bda56b10f06b460"
+
         url = f"https://newsapi.org/v2/everything?q=tsunami&sortBy=publishedAt&apiKey={api_key}"
 
         response = requests.get(url, timeout=5)
@@ -64,3 +70,8 @@ async def get_nasa_events():
     if isinstance(data, dict) and "error" in data:
         return JSONResponse(status_code=500, content=data)
     return JSONResponse(content=data)
+@app.post("/api/fetch-nasa")
+def fetch_nasa_data():
+    events = nasa_fetch_and_store.fetch_nasa_events()
+    nasa_fetch_and_store.store_events(events)
+    return {}  # returns nothing (silent response)
