@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import sqlite3
 import os
+import nasa_fetch_and_store
 
 app = FastAPI()
 DB_PATH = os.path.join(os.path.dirname(__file__), "../data/disaster.db")
@@ -54,3 +55,9 @@ def get_disasters():
         return {"error": str(e)}
     finally:
         conn.close()
+@app.post("/api/fetch-nasa")
+def fetch_nasa_data():
+    events = nasa_fetch_and_store.fetch_nasa_events()
+    nasa_fetch_and_store.store_events(events)
+    return {}  # returns nothing (silent response)
+

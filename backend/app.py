@@ -2,19 +2,16 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-<<<<<<< HEAD
 from functools import lru_cache
 import nasa_fetch_and_store 
-
 import requests
 import os
+import httpx
 from dotenv import load_dotenv
 
 load_dotenv()  # Load variables from .env
 api_key = os.getenv("NEWS_API_KEY")
-=======
-import httpx
->>>>>>> 8a54c83dcab2d877b3f9a1e701a9a87c7ba9f808
+
 
 app = FastAPI()
 
@@ -25,11 +22,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-<<<<<<< HEAD
-=======
 
 # 👋 Root route
->>>>>>> 8a54c83dcab2d877b3f9a1e701a9a87c7ba9f808
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Disaster News API. Use /api/disasters to get data."}
@@ -38,12 +33,9 @@ async def root():
 @app.get("/api/disasters")
 async def get_disasters():
     try:
-<<<<<<< HEAD
         # Replace with your own NewsAPI key
 
-=======
         api_key = "69f48923e7254c158bda56b10f06b460"  # Replace with env var in production
->>>>>>> 8a54c83dcab2d877b3f9a1e701a9a87c7ba9f808
         url = f"https://newsapi.org/v2/everything?q=tsunami&sortBy=publishedAt&apiKey={api_key}"
 
         async with httpx.AsyncClient(timeout=10) as client:
@@ -79,6 +71,7 @@ async def get_nasa_disasters():
         response.raise_for_status()
 
         events = response.json().get("events", [])
+        print(f"✅ Fetched {len(events)} events from NASA")
 
         data = [
             {
@@ -94,9 +87,9 @@ async def get_nasa_disasters():
         return JSONResponse(content=data)
 
     except Exception as e:
-<<<<<<< HEAD
-        return {"error": str(e)}
-    
+        print("❌ NASA API Error:", e)
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 @app.get("/api/nasa-events")
 async def get_nasa_events():
     data = cached_nasa_events()
@@ -108,7 +101,4 @@ def fetch_nasa_data():
     events = nasa_fetch_and_store.fetch_nasa_events()
     nasa_fetch_and_store.store_events(events)
     return {}  # returns nothing (silent response)
-=======
-        print("❌ NASA API Error:", e)
-        return JSONResponse(status_code=500, content={"error": str(e)})
->>>>>>> 8a54c83dcab2d877b3f9a1e701a9a87c7ba9f808
+
