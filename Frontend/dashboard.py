@@ -3,11 +3,9 @@ import requests
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
-<<<<<<< HEAD
-=======
 import feedparser
 import xmltodict
->>>>>>> 8a54c83dcab2d877b3f9a1e701a9a87c7ba9f808
+
 
 st.set_page_config(page_title="🌍 Real-Time Disaster Info", layout="wide")
 st.title("🌍 REAL-TIME-DISASTER-DASHBOARD")
@@ -44,7 +42,7 @@ st.markdown("""
     #MainMenu, header, footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
-page = st.radio("Navigation", ["🏠 Dashboard", "🗺️ Map", "📰 News", "📩 Help Request", "🚀 NASA","🌧️all india cap alert"],
+page = st.radio("Navigation", ["🏠 Dashboard", "🗸️ Map", "📰 News", "📩 Help Request", "🚀 NASA","🌧️ all india cap alert"],
                 horizontal=True, label_visibility="collapsed")
 
 if page != "🗸️ Map":
@@ -330,6 +328,7 @@ def main():
             report_type = st.radio("Report Type", ["Fraud", "Other"])
 
         st.subheader(f"{year} Q{quarter}")
+
         clicked_state = display_map(df_continental, year, quarter)
         final_state = clicked_state or state_name
 
@@ -342,14 +341,11 @@ def main():
         with col3:
             display_fraud_facts(df_loss, year, quarter, final_state, report_type, "Total Losses", "Total Loss")
 
-        elif page == "📰 News":
-            st.header("📰 NASA Disaster Feed (India)")
-
-        try:
-            df = pd.read_csv("../backend/disasters_export.csv")
-            st.dataframe(df, use_container_width=True)
-        except FileNotFoundError:
-            st.error("❌ CSV not found. Please run export_to_csv.py from backend.")
+    elif page == "📰 News":
+        placeholder = st.empty()
+        with placeholder.container():
+            st.header("📰 Disaster News")
+        display_API()
 
     elif page == "📩 Help Request":
         st.header("📩 Help Request Form")
@@ -383,7 +379,7 @@ def main():
         except Exception as e:
             st.error(f"❌ Failed to fetch NASA data: {e}")
 
-    elif page == "🌧️all india cap alert":
+    elif page == "🌧️ all india cap alert":
         st.header("🌧️ All India CAP Alerts")
 
         live_alerts = fetch_ndma_live_alerts()
@@ -391,7 +387,7 @@ def main():
         
        
         map_object = folium.Map(location=[22.9734, 78.6569], zoom_start=5, scrollWheelZoom=True, tiles='CartoDB positron')
-        add_ndma_alerts(map_object, live_alerts)  # ✅ Correct
+        add_ndma_alerts(map_object, live_alerts)  
         
         
         st_folium(map_object, width=1000, height=600)
