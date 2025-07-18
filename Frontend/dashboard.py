@@ -341,11 +341,12 @@ def main():
         with col3:
             display_fraud_facts(df_loss, year, quarter, final_state, report_type, "Total Losses", "Total Loss")
 
-    elif page == "📰 News":
+    if  page == "📰 News":
         placeholder = st.empty()
         with placeholder.container():
             st.header("📰 Disaster News")
         display_API()
+
 
     elif page == "📩 Help Request":
         st.header("📩 Help Request Form")
@@ -359,7 +360,8 @@ def main():
         st.header("🚀 NASA Disaster Events (EONET)")
 
         try:
-            response = requests.get("http://localhost:8000/api/nasa", timeout=10)
+            response = requests.get("http://localhost:8000/api/nasa-events", timeout=10)
+
             if response.status_code == 200:
                 data = response.json()
                 if data:
@@ -403,6 +405,10 @@ def main():
 
     # This must be the last line inside `main()` function
     st.markdown("<hr><p style='text-align:center;'>© 2025 Real-Time Disaster Dashboard | Developed by Himanshi Kanzariya</p>", unsafe_allow_html=True)
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
