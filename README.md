@@ -87,6 +87,6 @@ This project is open for submission under programs like GSoC, and hackathons. If
 
 🐛 Open an issue
 
-
-
 ---
+
+📧 Email:  kadiyadev07@gmail.com
